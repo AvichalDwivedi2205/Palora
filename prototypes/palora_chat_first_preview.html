@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  /* brand */
+  --amber:      #E8A84A;
+  --amber-d:    #B87A20;
+  --amber-pale: rgba(232,168,74,0.13);
+  --amber-bdr:  rgba(232,168,74,0.22);
+  --mint:       #5DC9A8;
+  --violet:     #8C80F0;
+
+  /* type */
+  --f-display: 'Fraunces', Georgia, serif;
+  --f-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --f-mono:    'IBM Plex Mono', monospace;
+
+  /* radii */
+  --r-xl: 24px;
+  --r-lg: 18px;
+  --r-md: 13px;
+  --r-sm: 9px;
+
+  /* motion */
+  --spring:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* layout */
+  --dock-w:    62px;
+  --topbar-h:  58px;
+}
+
+/* ─── DARK THEME ──────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:       #0E0B08;
+  --bg-2:     #141008;
+
+  --surface:       rgba(255,255,255,0.042);
+  --surface-hover: rgba(255,255,255,0.062);
+  --surface-bdr:   rgba(255,255,255,0.075);
+  --surface-top:   rgba(255,255,255,0.16);
+
+  --card-bg: linear-gradient(155deg,
+    rgba(255,255,255,0.065) 0%,
+    rgba(255,255,255,0.022) 55%,
+    rgba(255,255,255,0.04) 100%);
+  --card-blur: blur(48px) saturate(180%);
+  --card-shadow:
+    inset 0 1.5px 0 var(--surface-top),
+    inset 0 -1px 0 rgba(0,0,0,0.1),
+    0 2px 4px rgba(0,0,0,0.18),
+    0 10px 28px rgba(0,0,0,0.28),
+    0 32px 64px rgba(0,0,0,0.22);
+
+  --t1: rgba(255,248,238,0.93);
+  --t2: rgba(255,248,238,0.60);
+  --t3: rgba(255,248,238,0.36);
+  --t4: rgba(255,248,238,0.22);
+  --t5: rgba(255,248,238,0.10);
+
+  --dock-bg:   rgba(14,11,8,0.72);
+  --topbar-bg: rgba(14,11,8,0.75);
+  --bar-bg:    rgba(14,11,8,0.68);
+
+  --aurora1: rgba(180,100,20,0.22);
+  --aurora2: rgba(220,140,30,0.11);
+  --aurora3: rgba(140,100,50,0.08);
+  --aurora4: rgba(100,60,20,0.12);
+}
+
+/* ─── LIGHT THEME ─────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:   #F5EFE5;
+  --bg-2: #EDE5D8;
+
+  --surface:       rgba(255,255,255,0.72);
+  --surface-hover: rgba(255,255,255,0.88);
+  --surface-bdr:   rgba(160,120,60,0.14);
+  --surface-top:   rgba(255,255,255,0.95);
+
+  --card-bg: linear-gradient(155deg,
+    rgba(255,255,255,0.85) 0%,
+    rgba(255,255,255,0.60) 55%,
+    rgba(255,255,255,0.72) 100%);
+  --card-blur: blur(40px) saturate(160%);
+  --card-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.98),
+    inset 0 -1px 0 rgba(140,100,50,0.06),
+    0 2px 4px rgba(80,50,20,0.07),
+    0 8px 24px rgba(80,50,20,0.10),
+    0 24px 48px rgba(80,50,20,0.08);
+
+  --t1: rgba(40,24,10,0.92);
+  --t2: rgba(40,24,10,0.62);
+  --t3: rgba(40,24,10,0.42);
+  --t4: rgba(40,24,10,0.28);
+  --t5: rgba(40,24,10,0.10);
+
+  --dock-bg:   rgba(245,239,229,0.90);
+  --topbar-bg: rgba(245,239,229,0.88);
+  --bar-bg:    rgba(245,239,229,0.82);
+
+  --aurora1: rgba(220,160,60,0.22);
+  --aurora2: rgba(200,130,50,0.16);
+  --aurora3: rgba(240,180,80,0.10);
+  --aurora4: rgba(180,120,40,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-body);
+  font-size: 14px;
+  color: var(--t1);
+  background: var(--bg);
+  transition: background 320ms var(--spring), color 320ms;
+}
+
+button { cursor: pointer; font: inherit; background: none; border: none; color: inherit; }
+input, textarea { font: inherit; }
+
+/* ─── BG SCENE ────────────────────────────────────────────── */
+.bg-scene {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden; pointer-events: none;
+}
+.aurora {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); will-change: transform;
+}
+.aurora-1 {
+  width: 64vw; height: 58vh; top: -18%; left: -12%;
+  background: radial-gradient(ellipse, var(--aurora1) 0%, transparent 68%);
+  animation: a1 24s ease-in-out infinite;
+}
+.aurora-2 {
+  width: 52vw; height: 52vh; bottom: -18%; right: -8%;
+  background: radial-gradient(ellipse, var(--aurora2) 0%, transparent 68%);
+  animation: a2 30s ease-in-out infinite;
+}
+.aurora-3 {
+  width: 38vw; height: 44vh; top: 28%; left: 48%;
+  background: radial-gradient(ellipse, var(--aurora3) 0%, transparent 68%);
+  animation: a3 20s ease-in-out infinite;
+}
+.aurora-4 {
+  width: 28vw; height: 34vh; top: 60%; left: 20%;
+  background: radial-gradient(ellipse, var(--aurora4) 0%, transparent 68%);
+  animation: a2 16s ease-in-out infinite reverse;
+}
+@keyframes a1 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(4vw,-3vh) scale(1.06)} 70%{transform:translate(-2vw,4vh) scale(0.96)} }
+@keyframes a2 { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-5vw,3vh) scale(1.08)} 65%{transform:translate(3vw,-5vh) scale(0.94)} }
+@keyframes a3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-4vw,4vh) scale(1.12)} }
+
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.18;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 160px;
+}
+
+/* ─── GLASS ───────────────────────────────────────────────── */
+.glass {
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--surface-bdr);
+  box-shadow: var(--card-shadow);
+  position: relative;
+  transition: background 320ms, border-color 320ms, box-shadow 320ms;
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--surface-top) 40%, var(--surface-top) 60%, transparent);
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.55;
+  transition: opacity 320ms;
+}
+
+/* ─── SHELL ───────────────────────────────────────────────── */
+.app-shell {
+  position: relative; z-index: 2;
+  display: flex; width: 100vw; height: 100vh;
+}
+
+/* ─── DOCK ────────────────────────────────────────────────── */
+.dock {
+  width: var(--dock-w); flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 10px; gap: 4px;
+  border-right: 1px solid var(--surface-bdr);
+  background: var(--dock-bg);
+  backdrop-filter: blur(60px);
+  -webkit-backdrop-filter: blur(60px);
+  z-index: 30;
+  transition: background 320ms, border-color 320ms;
+}
+
+.dock-logo {
+  width: 36px; height: 36px; border-radius: 12px;
+  background: linear-gradient(145deg, #F0C46E 0%, #C87E20 100%);
+  display: grid; place-items: center;
+  font-family: var(--f-display);
+  font-size: 18px; font-weight: 900;
+  font-style: italic;
+  color: #1A0D00;
+  box-shadow: 0 0 0 1px rgba(255,190,70,0.28), 0 6px 20px rgba(200,130,30,0.32);
+  flex-shrink: 0; margin-bottom: 6px;
+  letter-spacing: -0.04em;
+}
+
+.dock-sep {
+  width: 26px; height: 1px;
+  background: var(--surface-bdr);
+  margin: 4px 0; flex-shrink: 0;
+  transition: background 320ms;
+}
+
+.dock-btn {
+  width: 40px; height: 40px; border-radius: 13px;
+  display: grid; place-items: center;
+  color: var(--t3);
+  transition: color 220ms var(--spring), background 220ms var(--spring),
+              transform 200ms var(--spring), box-shadow 220ms;
+  position: relative; flex-shrink: 0;
+}
+.dock-btn svg { width: 16px; height: 16px; stroke-width: 1.8; }
+.dock-btn:hover {
+  color: var(--t1);
+  background: var(--surface);
+  transform: scale(1.07);
+}
+.dock-btn.active {
+  color: var(--amber);
+  background: var(--amber-pale);
+  box-shadow: inset 0 1px 0 var(--amber-bdr), 0 0 18px rgba(232,168,74,0.10);
+}
+.dock-btn.active::before {
+  content: '';
+  position: absolute; left: -10px;
+  width: 3px; height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--amber);
+  box-shadow: 0 0 8px rgba(232,168,74,0.5);
+}
+.dock-badge {
+  position: absolute; top: 3px; right: 1px;
+  min-width: 15px; height: 15px;
+  border-radius: 999px;
+  background: var(--amber);
+  color: #1A0900;
+  font-size: 9px; font-weight: 700;
+  display: grid; place-items: center;
+  padding: 0 3px;
+}
+.dock-spacer { flex: 1; }
+
+/* ─── WORKSPACE ───────────────────────────────────────────── */
+.workspace {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+
+/* ─── TOPBAR ──────────────────────────────────────────────── */
+.topbar {
+  height: var(--topbar-h); flex-shrink: 0;
+  display: flex; align-items: center;
+  gap: 14px; padding: 0 20px;
+  border-bottom: 1px solid var(--surface-bdr);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  z-index: 20;
+  transition: background 320ms, border-color 320ms;
+}
+
+.brand { display: flex; align-items: baseline; gap: 8px; }
+.brand-name {
+  font-family: var(--f-display);
+  font-size: 20px; font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.06em;
+  color: var(--t1);
+}
+.brand-sub {
+  font-family: var(--f-mono);
+  font-size: 9.5px; font-weight: 400;
+  color: var(--t4); letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cmd-bar {
+  flex: 1; max-width: 500px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  display: flex; align-items: center; gap: 9px;
+  background: var(--surface);
+  border: 1px solid var(--surface-bdr);
+  color: var(--t3); font-size: 13px;
+  transition: background 180ms, border-color 180ms, box-shadow 180ms;
+  cursor: text;
+}
+.cmd-bar:hover {
+  background: var(--surface-hover);
+  border-color: var(--amber-bdr);
+  box-shadow: 0 0 0 3px var(--amber-pale);
+}
+.cmd-bar svg { flex-shrink: 0; }
+.cmd-bar span { flex: 1; font-size: 12.5px; }
+.cmd-keys { display: flex; gap: 3px; flex-shrink: 0; }
+.key {
+  font-family: var(--f-mono);
+  font-size: 9.5px; padding: 2px 5px;
+  border-radius: 5px;
+  background: var(--t5);
+  border: 1px solid var(--surface-bdr);
+  color: var(--t4);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.chip {
+  padding: 5px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 500;
+  border: 1px solid var(--surface-bdr);
+  background: var(--surface);
+  color: var(--t2);
+  white-space: nowrap;
+  transition: background 320ms, border-color 320ms;
+}
+.chip.amber {
+  color: var(--amber);
+  background: var(--amber-pale);
+  border-color: var(--amber-bdr);
+}
+
+/* theme toggle */
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  color: var(--t2);
+  transition: background 220ms, color 220ms, transform 180ms var(--spring);
+}
+.theme-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--amber);
+  transform: scale(1.07);
+}
+.theme-toggle svg { width: 15px; height: 15px; stroke-width: 1.8; }
+
+/* ─── VIEWS ───────────────────────────────────────────────── */
+.views {
+  flex: 1; min-height: 0;
+  position: relative; overflow: hidden;
+}
+.view {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px) scale(0.987);
+  transition: opacity 340ms var(--spring), transform 380ms var(--spring);
+  overflow: hidden;
+}
+.view.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); z-index: 1; }
+.view.exit { opacity: 0; transform: translateY(-8px) scale(1.01); transition: opacity 190ms ease-in, transform 190ms ease-in; }
+
+/* ─── HOME LAYOUT ─────────────────────────────────────────── */
+.home-layout {
+  height: 100%; padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 220px 1fr 264px;
+  gap: 12px;
+}
+.col { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+
+/* ─── SHARED ATOMS ────────────────────────────────────────── */
+.label {
+  font-family: var(--f-mono);
+  font-size: 9.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--t4);
+}
+
+.tag {
+  padding: 4px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--surface-bdr);
+  color: var(--t3);
+  transition: background 320ms, border-color 320ms;
+}
+.tag.amber { color: var(--amber); background: var(--amber-pale); border-color: var(--amber-bdr); }
+.tag.mint  { color: var(--mint); background: rgba(93,201,168,0.10); border-color: rgba(93,201,168,0.20); }
+.tag.violet{ color: #C0BAFF; background: rgba(140,128,240,0.10); border-color: rgba(140,128,240,0.20); }
+
+.btn-primary {
+  padding: 9px 15px; border-radius: 999px;
+  background: linear-gradient(180deg, #F0C058 0%, #C87E22 100%);
+  color: #180E00; font-weight: 600; font-size: 12.5px;
+  border: 1px solid rgba(255,195,70,0.12);
+  box-shadow: 0 1px 0 rgba(255,215,90,0.22) inset, 0 4px 14px rgba(200,130,30,0.28);
+  transition: transform 170ms var(--spring), box-shadow 170ms;
+}
+.btn-primary:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 1px 0 rgba(255,215,90,0.22) inset, 0 8px 22px rgba(200,130,30,0.38);
+}
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-ghost {
+  padding: 9px 13px; border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--surface-bdr);
+  color: var(--t2); font-size: 12.5px;
+  transition: background 150ms, transform 170ms var(--spring), border-color 150ms;
+}
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  border-color: var(--amber-bdr);
+  transform: translateY(-1px);
+}
+
+.mini-action {
+  width: 100%; padding: 9px 12px; border-radius: 11px; text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--surface-bdr);
+  color: var(--t2); font-size: 12.5px;
+  transition: background 150ms, border-color 150ms, transform 190ms var(--spring);
+}
+.mini-action:hover {
+  background: var(--surface-hover);
+  border-color: var(--amber-bdr);
+  transform: translateX(2px);
+}
+
+/* ─── QUEUE ───────────────────────────────────────────────── */
+.queue-card {
+  flex: 1; padding: 16px 14px;
+  border-radius: var(--r-xl);
+  overflow: auto;
+}
+
+.q-item {
+  width: 100%; padding: 12px 13px;
+  border-radius: 15px; text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--surface-bdr);
+  margin-bottom: 7px;
+  transition: background 160ms, border-color 160ms,
+              transform 240ms var(--spring), box-shadow 240ms;
+  position: relative; overflow: hidden;
+}
+.q-item:hover {
+  background: var(--surface-hover);
+  border-color: var(--amber-bdr);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+}
+.q-item.active {
+  background: var(--amber-pale);
+  border-color: var(--amber-bdr);
+  box-shadow: inset 0 1px 0 var(--amber-bdr);
+}
+.q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.q-kind { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--t4); }
+.q-time { font-size: 11px; color: var(--t4); font-family: var(--f-mono); }
+.q-title {
+  font-family: var(--f-display);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.025em; line-height: 1.2;
+  color: var(--t1);
+}
+.q-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 9px; }
+
+/* ─── SPOTLIGHT ───────────────────────────────────────────── */
+.spotlight-card {
+  border-radius: var(--r-xl); padding: 26px 26px 22px;
+  background:
+    radial-gradient(ellipse 70% 80% at 85% 50%, rgba(232,168,74,0.10) 0%, transparent 55%),
+    var(--card-bg);
+  position: relative; overflow: hidden; min-height: 200px;
+  display: flex; flex-direction: column;
+}
+.spotlight-card::after {
+  content: ''; position: absolute; bottom: -40px; right: -30px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,168,74,0.12), transparent 70%);
+  pointer-events: none;
+}
+.spotlight-eyebrow { margin-bottom: 9px; }
+.spotlight-title {
+  font-family: var(--f-display);
+  font-size: clamp(28px, 3.2vw, 48px);
+  font-weight: 900; font-style: italic;
+  letter-spacing: -0.04em; line-height: 0.97;
+  color: var(--t1); max-width: 660px; flex: 1;
+}
+.spotlight-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 14px 0; }
+.spotlight-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+
+/* ─── BOTTOM ROW ──────────────────────────────────────────── */
+.home-bottom { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; }
+
+.timeline-card { border-radius: var(--r-xl); padding: 16px; overflow: auto; }
+
+.tl-item {
+  display: grid; grid-template-columns: 44px 1fr;
+  gap: 9px; padding: 9px 0;
+  border-top: 1px solid var(--surface-bdr);
+}
+.tl-item:first-child { border-top: none; }
+.tl-time { font-family: var(--f-mono); font-size: 10px; color: var(--t4); padding-top: 2px; }
+.tl-text { font-size: 12.5px; color: var(--t2); line-height: 1.55; font-weight: 400; }
+
+.stats-card { border-radius: var(--r-xl); padding: 16px; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.stat-tile {
+  padding: 12px 11px; border-radius: 13px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  transition: background 320ms, border-color 320ms;
+}
+.stat-tile strong {
+  display: block;
+  font-family: var(--f-display);
+  font-size: 22px; font-weight: 700; font-style: italic;
+  letter-spacing: -0.04em;
+}
+.stat-tile span { font-size: 10.5px; color: var(--t3); margin-top: 2px; display: block; }
+
+/* ─── CONTEXT + MEMORY ────────────────────────────────────── */
+.context-card { border-radius: var(--r-xl); padding: 16px; flex: 0 0 auto; }
+.memory-card  { border-radius: var(--r-xl); padding: 14px; flex: 1; min-height: 0; overflow: hidden; }
+
+.ctx-eyebrow { color: var(--t4); font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+.ctx-name {
+  font-family: var(--f-display);
+  font-size: 22px; font-weight: 700; font-style: italic;
+  letter-spacing: -0.04em; margin-bottom: 12px;
+}
+.ctx-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+.ctx-stat {
+  padding: 9px 8px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  text-align: center;
+  transition: background 320ms, border-color 320ms;
+}
+.ctx-stat strong { display: block; font-family: var(--f-display); font-size: 16px; font-weight: 700; }
+.ctx-stat span { font-size: 9.5px; color: var(--t3); }
+.ctx-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.ctx-actions { display: flex; flex-direction: column; gap: 5px; }
+
+.memory-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.memory-stage {
+  height: 162px; border-radius: 14px;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 30%, rgba(140,128,240,0.12) 0%, transparent 60%),
+    var(--surface);
+  border: 1px solid var(--surface-bdr);
+  position: relative; overflow: hidden; margin-bottom: 9px;
+  transition: background 320ms, border-color 320ms;
+}
+.mini-bubble {
+  position: absolute; border-radius: 999px;
+  border: 1px solid var(--surface-bdr);
+  background: var(--surface);
+}
+.mini-node {
+  position: absolute; transform: translate(-50%,-50%);
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--surface-bdr);
+  background: var(--surface);
+  display: grid; place-items: center;
+  font-family: var(--f-mono); font-size: 9.5px; font-weight: 500;
+  color: var(--t3);
+}
+.mini-proj {
+  position: absolute; transform: translate(-50%,-50%);
+  padding: 0 9px; height: 28px; border-radius: 8px;
+  border: 1px solid rgba(140,128,240,0.22);
+  background: rgba(140,128,240,0.10);
+  display: grid; place-items: center;
+  font-family: var(--f-mono); font-size: 10px; color: #C0BAFF;
+}
+
+/* ─── CHAT ────────────────────────────────────────────────── */
+.chat-layout {
+  height: 100%; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr 290px; gap: 12px;
+}
+.chat-card {
+  border-radius: var(--r-xl); padding: 18px;
+  display: grid; grid-template-rows: auto 1fr auto; gap: 12px; min-height: 0;
+}
+.chat-head { display: flex; align-items: center; justify-content: space-between; }
+.chat-head-name {
+  font-family: var(--f-mono);
+  font-size: 9.5px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--t4); margin-bottom: 4px;
+}
+.chat-head-title {
+  font-family: var(--f-display);
+  font-size: 18px; font-weight: 700; font-style: italic;
+  letter-spacing: -0.03em;
+}
+
+.thread { overflow: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+
+.msg { display: flex; gap: 9px; align-items: flex-start; }
+.msg-av {
+  width: 30px; height: 30px; border-radius: 10px;
+  display: grid; place-items: center; flex-shrink: 0;
+  font-family: var(--f-display); font-size: 12px; font-weight: 900; font-style: italic;
+}
+.msg.assistant .msg-av { background: var(--amber-pale); color: var(--amber); }
+.msg.user .msg-av      { background: var(--surface); color: var(--t2); }
+.msg-who { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--t4); margin-bottom: 4px; }
+.bubble {
+  padding: 11px 13px; border-radius: 15px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  font-size: 13px; line-height: 1.65; color: var(--t2);
+  font-weight: 400;
+  transition: background 320ms, border-color 320ms;
+}
+.chat-tool { margin-top: 7px; padding: 11px; border-radius: 12px; background: var(--surface); border: 1px solid var(--surface-bdr); }
+.chat-tool h4 { font-family: var(--f-display); font-size: 13px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.02em; }
+.chat-tool p { font-size: 12px; color: var(--t2); line-height: 1.5; }
+.chat-tool-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.chat-tool-actions button {
+  padding: 6px 10px; border-radius: 999px; font-size: 11.5px;
+  background: var(--surface); border: 1px solid var(--surface-bdr); color: var(--t2);
+  transition: background 140ms;
+}
+.chat-tool-actions button.primary { color: var(--amber); background: var(--amber-pale); border-color: var(--amber-bdr); }
+.chat-tool-actions button:hover { background: var(--surface-hover); }
+
+.composer {
+  border-radius: 18px; padding: 13px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  transition: background 320ms, border-color 320ms;
+}
+.composer textarea {
+  width: 100%; min-height: 82px; resize: none;
+  background: transparent; border: none; outline: none;
+  color: var(--t1); font-size: 13.5px; line-height: 1.6; font-weight: 400;
+}
+.composer textarea::placeholder { color: var(--t4); }
+.composer-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 9px; margin-top: 9px;
+}
+.suggestions { display: flex; flex-wrap: wrap; gap: 5px; }
+.suggestion {
+  padding: 5px 9px; border-radius: 999px; font-size: 11px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  color: var(--t3); font-weight: 400;
+  transition: background 140ms, color 140ms, border-color 140ms;
+}
+.suggestion:hover { background: var(--amber-pale); color: var(--amber); border-color: var(--amber-bdr); }
+
+.chat-side { display: flex; flex-direction: column; gap: 10px; }
+.side-block { border-radius: var(--r-xl); padding: 15px; }
+.side-block .s-eyebrow { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--t4); margin-bottom: 5px; }
+.side-block h3 { font-family: var(--f-display); font-size: 16px; font-weight: 700; font-style: italic; letter-spacing: -0.03em; margin-bottom: 6px; }
+.side-block p { font-size: 12.5px; color: var(--t2); line-height: 1.55; font-weight: 400; }
+.side-block .tag-row { margin-top: 9px; display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ─── RECALL ──────────────────────────────────────────────── */
+.recall-layout {
+  height: 100%; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr 290px; gap: 12px;
+}
+.recall-stage-card { border-radius: var(--r-xl); position: relative; overflow: hidden; }
+.recall-header {
+  position: absolute; top: 16px; left: 16px; right: 16px;
+  z-index: 5; display: flex; align-items: flex-start; justify-content: space-between;
+}
+.recall-header-title {
+  font-family: var(--f-display);
+  font-size: 15px; font-weight: 700; font-style: italic; letter-spacing: -0.02em;
+}
+.recall-stage {
+  position: absolute; top: 66px; left: 12px; right: 12px; bottom: 12px;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 35%, rgba(140,128,240,0.10) 0%, transparent 60%),
+    var(--surface);
+  border: 1px solid var(--surface-bdr);
+  overflow: hidden;
+  transition: background 320ms, border-color 320ms;
+}
+.cluster-bubble { position: absolute; border-radius: 32px; border: 1px solid var(--surface-bdr); background: var(--surface); }
+.cluster-label {
+  position: absolute;
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--t4);
+}
+.graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.graph-node {
+  position: absolute; transform: translate(-50%,-50%);
+  background: none; border: none;
+  transition: filter 240ms;
+}
+.graph-halo {
+  position: absolute; inset: -18px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,168,74,0.18), transparent 65%);
+  opacity: 0; transition: opacity 180ms;
+}
+.graph-node:hover .graph-halo, .graph-node.active .graph-halo { opacity: 1; }
+.graph-vis {
+  position: relative; z-index: 1;
+  min-width: 48px; min-height: 48px; border-radius: 14px;
+  display: grid; place-items: center;
+  border: 1px solid var(--surface-bdr);
+  background: var(--surface);
+  font-family: var(--f-mono); font-size: 11px; font-weight: 500;
+  color: var(--t2);
+  transition: transform 190ms var(--spring), box-shadow 190ms, background 320ms;
+}
+.graph-node:hover .graph-vis { transform: scale(1.08); box-shadow: 0 7px 22px rgba(0,0,0,0.28); }
+.graph-node.active .graph-vis { border-color: var(--amber-bdr); box-shadow: 0 0 18px rgba(232,168,74,0.18); }
+.graph-node.person  .graph-vis { border-radius: 50%; }
+.graph-node.project .graph-vis { min-height: 38px; padding: 0 12px; border-radius: 11px; background: rgba(99,120,255,0.10); border-color: rgba(99,120,255,0.22); color: #CDD6FF; }
+.graph-node.task    .graph-vis { min-height: 34px; min-width: auto; padding: 0 11px; border-radius: 10px; background: var(--amber-pale); border-color: var(--amber-bdr); color: #E8C580; }
+.graph-node.rule    .graph-vis { min-height: 34px; min-width: auto; padding: 0 11px; border-radius: 10px; background: rgba(140,128,240,0.10); border-color: rgba(140,128,240,0.20); color: #C0BAFF; }
+.graph-label { margin-top: 6px; font-size: 10px; color: var(--t3); text-align: center; font-family: var(--f-body); font-weight: 400; }
+
+.recall-inspector { display: flex; flex-direction: column; gap: 8px; border-radius: var(--r-xl); padding: 16px; overflow: auto; }
+.inspector-block {
+  padding: 13px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  transition: background 320ms, border-color 320ms;
+}
+.inspector-block .eyebrow { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--t4); margin-bottom: 5px; }
+.inspector-block h2 { font-family: var(--f-display); font-size: 20px; font-weight: 700; font-style: italic; letter-spacing: -0.04em; margin-bottom: 7px; }
+.inspector-block p { font-size: 12.5px; color: var(--t2); line-height: 1.6; font-weight: 400; }
+
+/* ─── DRAFTS ──────────────────────────────────────────────── */
+.drafts-layout {
+  height: 100%; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.draft-list-card { border-radius: var(--r-xl); padding: 16px; overflow: auto; }
+.draft-detail-card { border-radius: var(--r-xl); padding: 16px; display: flex; flex-direction: column; gap: 9px; }
+
+.draft-item {
+  width: 100%; padding: 13px; border-radius: 15px; text-align: left;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  margin-bottom: 7px;
+  transition: background 150ms, transform 210ms var(--spring), box-shadow 210ms;
+}
+.draft-item:hover { background: var(--surface-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+.draft-item-kind { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--t4); margin-bottom: 6px; }
+.draft-item-title { font-family: var(--f-display); font-size: 15px; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 5px; }
+.draft-item-body { font-size: 12.5px; color: var(--t2); line-height: 1.5; margin-bottom: 9px; font-weight: 400; }
+.draft-item .tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ─── ACT ─────────────────────────────────────────────────── */
+.act-layout {
+  height: 100%; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.act-list-card { border-radius: var(--r-xl); padding: 16px; overflow: auto; }
+.act-policy-card { border-radius: var(--r-xl); padding: 16px; display: flex; flex-direction: column; gap: 9px; }
+.act-item {
+  width: 100%; padding: 13px; border-radius: 15px; text-align: left;
+  background: var(--surface); border: 1px solid var(--surface-bdr);
+  margin-bottom: 7px;
+  transition: background 150ms, transform 210ms var(--spring);
+}
+.act-item:hover { background: var(--surface-hover); transform: translateY(-1px); }
+.act-item-kind { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--t4); margin-bottom: 6px; }
+.act-item-title { font-family: var(--f-display); font-size: 15px; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 5px; }
+.act-item-body { font-size: 12.5px; color: var(--t2); line-height: 1.5; margin-bottom: 9px; font-weight: 400; }
+.act-item .tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ─── STATUS BAR ──────────────────────────────────────────── */
+.status-bar {
+  height: 36px; flex-shrink: 0;
+  border-top: 1px solid var(--surface-bdr);
+  background: var(--bar-bg);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px; gap: 10px;
+  transition: background 320ms, border-color 320ms;
+}
+.status-bar small {
+  font-family: var(--f-mono);
+  font-size: 10px; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--t4);
+}
+
+/* ─── COMMAND PALETTE ─────────────────────────────────────── */
+.cmd-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; justify-content: center; padding-top: 72px;
+  background: rgba(0,0,0,0.38);
+  backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 180ms;
+}
+.cmd-overlay.open { opacity: 1; pointer-events: auto; }
+
+.cmd-palette {
+  width: min(680px, calc(100vw - 28px));
+  border-radius: 22px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--surface-bdr);
+  box-shadow: var(--card-shadow);
+  padding: 16px;
+  transform: translateY(-10px) scale(0.97);
+  transition: transform 300ms var(--spring);
+  align-self: flex-start;
+}
+.cmd-overlay.open .cmd-palette { transform: translateY(0) scale(1); }
+
+.palette-input-row { display: flex; align-items: center; gap: 9px; }
+.palette-input {
+  flex: 1; border: none; outline: none;
+  background: transparent; color: var(--t1); font-size: 16px;
+  font-family: var(--f-body);
+}
+.palette-input::placeholder { color: var(--t4); }
+.palette-sep { height: 1px; background: var(--surface-bdr); margin: 12px 0; }
+.palette-sec-title { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--t4); margin-bottom: 7px; }
+.palette-actions { display: flex; flex-direction: column; gap: 4px; }
+.palette-action {
+  width: 100%; padding: 11px 12px; border-radius: 13px; text-align: left;
+  background: var(--surface); border: 1px solid var(--surface-bdr); color: var(--t1);
+  transition: background 130ms, border-color 130ms, transform 180ms var(--spring);
+}
+.palette-action:hover { background: var(--surface-hover); border-color: var(--amber-bdr); transform: translateX(2px); }
+.palette-action strong { display: block; font-size: 13px; font-weight: 500; }
+.palette-action span { display: block; margin-top: 2px; font-size: 11px; color: var(--t3); }
+
+/* ─── TOAST ───────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  padding: 9px 15px; border-radius: 12px;
+  background: var(--dock-bg);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--surface-bdr);
+  box-shadow: var(--card-shadow);
+  color: var(--t2); font-size: 12.5px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 160ms, transform 240ms var(--spring);
+  z-index: 90; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--surface-bdr); border-radius: 999px; }
+
+/* ─── STAGGER ─────────────────────────────────────────────── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.stagger>* { animation: fadeUp 440ms var(--spring) both; }
+.stagger>*:nth-child(1){animation-delay:0ms}
+.stagger>*:nth-child(2){animation-delay:55ms}
+.stagger>*:nth-child(3){animation-delay:110ms}
+.stagger>*:nth-child(4){animation-delay:165ms}
+
+@media (max-width:1100px) {
+  .home-layout { grid-template-columns: 190px 1fr 230px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-scene" aria-hidden="true">
+  <div class="aurora aurora-1"></div>
+  <div class="aurora aurora-2"></div>
+  <div class="aurora aurora-3"></div>
+  <div class="aurora aurora-4"></div>
+</div>
+<div class="noise-overlay" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- DOCK -->
+  <nav class="dock" aria-label="Navigation">
+    <div class="dock-logo">P</div>
+    <div class="dock-sep"></div>
+    <button class="dock-btn active" data-view="home" onclick="nav('home')" title="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12L12 4l9 8"/><path d="M5 10.5V20h5v-5h4v5h5v-9.5"/></svg>
+    </button>
+    <button class="dock-btn" data-view="chat" onclick="nav('chat')" title="Chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </button>
+    <button class="dock-btn" data-view="recall" onclick="nav('recall')" title="Recall">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="dock-btn" data-view="drafts" onclick="nav('drafts')" title="Drafts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      <span class="dock-badge">2</span>
+    </button>
+    <button class="dock-btn" data-view="act" onclick="nav('act')" title="Act">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span class="dock-badge">1</span>
+    </button>
+    <div class="dock-sep"></div>
+    <div class="dock-spacer"></div>
+    <button class="dock-btn" onclick="toast('Settings coming soon')" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+  </nav>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-name">Palora</span>
+        <span class="brand-sub">Preview</span>
+      </div>
+
+      <button class="cmd-bar" onclick="openPalette()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Ask Palora anything…</span>
+        <div class="cmd-keys"><span class="key">⌘</span><span class="key">K</span></div>
+      </button>
+
+      <div class="topbar-right">
+        <div class="chip amber">3 waiting</div>
+        <div class="chip">2 drafts</div>
+        <div class="chip">1 approval</div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
+          <!-- icon swapped by JS -->
+          <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEWS -->
+    <div class="views">
+
+      <!-- HOME -->
+      <section class="view active" data-panel="home">
+        <div class="home-layout">
+          <div class="col">
+            <div class="glass queue-card stagger" id="queue-list">
+              <div class="label" style="margin-bottom:14px">Queue</div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="glass spotlight-card" id="spotlight"></div>
+            <div class="home-bottom">
+              <div class="glass timeline-card">
+                <div class="label">Movement</div>
+                <div id="timeline-items" style="margin-top:10px"></div>
+              </div>
+              <div class="glass stats-card">
+                <div class="label">Now</div>
+                <div class="stats-grid" style="margin-top:10px">
+                  <div class="stat-tile"><strong>3</strong><span>open loops</span></div>
+                  <div class="stat-tile"><strong>1</strong><span>approval pending</span></div>
+                  <div class="stat-tile"><strong>2</strong><span>drafts staged</span></div>
+                  <div class="stat-tile"><strong>4:00</strong><span>next deadline</span></div>
+                </div>
+                <div class="mini-actions" style="display:flex;flex-direction:column;gap:5px;margin-top:9px">
+                  <button class="mini-action" onclick="openPalette('What am I waiting on right now?')">Ask what is blocking me</button>
+                  <button class="mini-action" onclick="nav('chat')">Open full chat</button>
+                  <button class="mini-action" onclick="nav('act')">Review approvals</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="glass context-card" id="context-panel"></div>
+            <div class="glass memory-card">
+              <div class="memory-header">
+                <span class="label">Memory</span>
+                <button class="tag" onclick="nav('recall')" style="cursor:pointer">Expand →</button>
+              </div>
+              <div class="memory-stage">
+                <div class="mini-bubble" style="left:8%;top:14%;width:36%;height:56%;"></div>
+                <div class="mini-bubble" style="left:46%;top:16%;width:44%;height:60%;"></div>
+                <div class="mini-node" style="left:27%;top:50%">RX</div>
+                <div class="mini-node" style="left:47%;top:60%">YOU</div>
+                <div class="mini-proj" style="left:64%;top:34%">Palora</div>
+                <div class="mini-node" style="left:78%;top:54%">Rule</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;margin-top:9px">
+                <button class="mini-action" onclick="nav('recall')">Open recall graph</button>
+                <button class="mini-action" onclick="openPalette('Show Priya context before I reply.')">Search thread</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHAT -->
+      <section class="view" data-panel="chat">
+        <div class="chat-layout">
+          <div class="glass chat-card">
+            <div class="chat-head">
+              <div>
+                <div class="chat-head-name">Full chat</div>
+                <div class="chat-head-title">Agentic conversation</div>
+              </div>
+              <button class="cmd-bar" style="max-width:240px" onclick="openPalette()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span style="font-size:12px">Quick ask</span>
+                <div class="cmd-keys"><span class="key">⌘K</span></div>
+              </button>
+            </div>
+            <div class="thread" id="chat-thread"></div>
+            <div class="composer">
+              <textarea id="chat-composer" placeholder="Message Palora…"></textarea>
+              <div class="composer-foot">
+                <div class="suggestions">
+                  <button class="suggestion" onclick="setPrompt('Draft follow-up to Recruiter X in my tone and ask me before sending.')">Draft follow-up</button>
+                  <button class="suggestion" onclick="setPrompt('What am I waiting on right now?')">Waiting on</button>
+                  <button class="suggestion" onclick="setPrompt('Summarize Priya backend spec for me.')">Summarize spec</button>
+                </div>
+                <button class="btn-primary" onclick="toast('Backend not wired in preview')">Send</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-side">
+            <div class="glass side-block" id="chat-context"></div>
+            <div class="glass side-block">
+              <div class="s-eyebrow">Agent lane</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-top:7px">
+                <div style="padding:11px;border-radius:12px;background:var(--surface);border:1px solid var(--surface-bdr)">
+                  <div class="s-eyebrow" style="margin-bottom:4px">Draft</div>
+                  <h3 style="font-family:var(--f-display);font-size:14px;font-weight:700;font-style:italic;letter-spacing:-0.02em;margin-bottom:4px">Create or revise outreach</h3>
+                  <p style="font-size:12px;color:var(--t2);line-height:1.5">Use full chat for multi-revision, style-controlled writing.</p>
+                </div>
+                <div style="padding:11px;border-radius:12px;background:var(--surface);border:1px solid var(--surface-bdr)">
+                  <div class="s-eyebrow" style="margin-bottom:4px">Act</div>
+                  <h3 style="font-family:var(--f-display);font-size:14px;font-weight:700;font-style:italic;letter-spacing:-0.02em;margin-bottom:4px">Propose actions</h3>
+                  <p style="font-size:12px;color:var(--t2);line-height:1.5">Stages reminders and sends. Human always approves.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECALL -->
+      <section class="view" data-panel="recall">
+        <div class="recall-layout">
+          <div class="glass recall-stage-card">
+            <div class="recall-header">
+              <div>
+                <div class="label" style="margin-bottom:4px">Recall</div>
+                <div class="recall-header-title">Memory graph</div>
+              </div>
+              <div style="display:flex;gap:5px;flex-wrap:wrap">
+                <div class="chip amber">People</div>
+                <div class="chip">Projects</div>
+                <div class="chip">Rules</div>
+              </div>
+            </div>
+            <div class="recall-stage" id="recall-stage">
+              <div class="cluster-bubble" style="left:4%;top:8%;width:34%;height:58%;"></div>
+              <div class="cluster-label" style="left:5.5%;top:10%;">Career</div>
+              <div class="cluster-bubble" style="left:46%;top:12%;width:44%;height:62%;"></div>
+              <div class="cluster-label" style="left:47.5%;top:13.5%;">Build</div>
+              <svg class="graph-svg" id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+          </div>
+          <div class="glass recall-inspector" id="recall-inspector"></div>
+        </div>
+      </section>
+
+      <!-- DRAFTS -->
+      <section class="view" data-panel="drafts">
+        <div class="drafts-layout">
+          <div class="glass draft-list-card">
+            <div class="label" style="margin-bottom:14px">Drafts</div>
+            <div id="draft-list"></div>
+          </div>
+          <div class="col">
+            <div class="glass draft-detail-card">
+              <div class="label">Selected draft</div>
+              <div style="padding:13px;border-radius:13px;background:var(--surface);border:1px solid var(--surface-bdr)">
+                <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t4);margin-bottom:5px">Current focus</div>
+                <div style="font-family:var(--f-display);font-size:18px;font-weight:700;font-style:italic;letter-spacing:-0.03em;margin-bottom:7px">RE: Senior Engineering Role</div>
+                <p style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:11px;font-weight:400">Warm-formal follow-up. Asks for timeline clarity. Ready for one small revision, then approval in act lane.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag amber">Needs approval</span><span class="tag">Mail draft</span><span class="tag mint">Tone matched</span></div>
+              </div>
+            </div>
+            <div class="glass" style="border-radius:var(--r-xl);padding:16px;flex:1">
+              <div class="label" style="margin-bottom:10px">Why this mode</div>
+              <p style="font-size:12.5px;color:var(--t2);line-height:1.7;font-weight:400">Drafting is its own cognitive mode. Home triages. Chat reasons. Drafts lets you polish language without drowning in reminders or graph noise.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACT -->
+      <section class="view" data-panel="act">
+        <div class="act-layout">
+          <div class="glass act-list-card">
+            <div class="label" style="margin-bottom:14px">Approvals + reminders</div>
+            <div id="act-list"></div>
+          </div>
+          <div class="col">
+            <div class="glass" style="border-radius:var(--r-xl);padding:16px;display:flex;flex-direction:column;gap:9px">
+              <div class="label">Automation shape</div>
+              <div style="padding:13px;border-radius:13px;background:var(--surface);border:1px solid var(--surface-bdr)">
+                <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t4);margin-bottom:5px">Watch rule</div>
+                <div style="font-family:var(--f-display);font-size:16px;font-weight:700;font-style:italic;letter-spacing:-0.02em;margin-bottom:6px">Recruiter follow-up monitor</div>
+                <p style="font-size:12.5px;color:var(--t2);line-height:1.55;margin-bottom:9px;font-weight:400">If no reply by tomorrow 10:00 AM, resurface in home and suggest new follow-up draft.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag amber">Active</span><span class="tag">Thread-linked</span></div>
+              </div>
+              <div style="padding:13px;border-radius:13px;background:var(--surface);border:1px solid var(--surface-bdr)">
+                <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--t4);margin-bottom:5px">Policy</div>
+                <div style="font-family:var(--f-display);font-size:16px;font-weight:700;font-style:italic;letter-spacing:-0.02em;margin-bottom:6px">Never auto-send external mail</div>
+                <p style="font-size:12.5px;color:var(--t2);line-height:1.55;margin-bottom:9px;font-weight:400">Assistant drafts and stages. Human approves before anything leaves machine.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag mint">Safety</span><span class="tag">MVP rule</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- STATUS BAR -->
+    <footer class="status-bar">
+      <small>Home · triage &nbsp;·&nbsp; ⌘K · quick ask &nbsp;·&nbsp; Chat · agentic &nbsp;·&nbsp; Recall · memory</small>
+      <div style="display:flex;align-items:center;gap:5px">
+        <span class="key">⌘</span><span class="key">K</span>
+        <small style="font-family:var(--f-mono)">command palette</small>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="closePaletteOutside(event)">
+  <div class="cmd-palette" onclick="event.stopPropagation()">
+    <div class="palette-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="palette-input" id="palette-input" placeholder="Ask Palora anything…" oninput="filterPalette(this.value)" onkeydown="paletteKey(event)">
+      <span class="key">Esc</span>
+    </div>
+    <div class="palette-sep"></div>
+    <div class="palette-sec-title">Suggested actions</div>
+    <div class="palette-actions" id="palette-actions"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+/* ─── DATA ─────────────────────────────────────────────────── */
+const focusItems = [
+  {
+    id:'recruiter', kind:'follow-up', time:'Today',
+    title:'Send Recruiter X follow-up',
+    summary:'Draft ready. Best unblock right now. Last reply was 3 days ago.',
+    tags:['career','waiting on','draft ready'],
+    prompt:'Draft follow-up to Recruiter X in my tone and ask me before sending.',
+    context:{
+      eyebrow:'Senior engineering role at Company Y',
+      name:'Recruiter X',
+      summary:'Two-thread relationship. Positive tone so far. Best move is gentle follow-up today while timing still warm.',
+      stats:[{v:'2',l:'open threads'},{v:'3d',l:'since reply'},{v:'91%',l:'confidence'}],
+      tags:['Warm-formal','Never auto-send','Approval required'],
+      actions:['Open full chat for draft','Open recall graph','Create reminder']
+    }
+  },
+  {
+    id:'priya', kind:'review', time:'4:00 PM',
+    title:'Review Priya backend spec',
+    summary:'Palora backend architecture v1 shared yesterday. Need comments before sync.',
+    tags:['build','teammate','today'],
+    prompt:'Summarize Priya backend spec in 5 bullets and draft my review comments.',
+    context:{
+      eyebrow:'Teammate on Palora build',
+      name:'Priya M.',
+      summary:'Strong collaborator. Shared backend spec yesterday. Best move is fast synthesis before meeting window closes.',
+      stats:[{v:'8',l:'new chunks'},{v:'1',l:'doc pending'},{v:'87%',l:'confidence'}],
+      tags:['Thursday sync','Backend scaffold','Spec pending'],
+      actions:['Open full chat for summary','Search memory','Draft review']
+    }
+  },
+  {
+    id:'intro', kind:'approval', time:'Whenever',
+    title:'Approve intro draft',
+    summary:'Intro template for new engineering contacts. Tone already matched from past examples.',
+    tags:['draft','approval','networking'],
+    prompt:'Show intro draft and highlight anything too formal or too long.',
+    context:{
+      eyebrow:'Reusable networking draft',
+      name:'Intro Email Draft',
+      summary:'Draft nearly ready. Main question is whether opener feels sharp enough and ask feels concrete.',
+      stats:[{v:'1',l:'draft'},{v:'14w',l:'avg sentence'},{v:'76%',l:'match score'}],
+      tags:['Reusable pattern','Warm but concise','Pending approval'],
+      actions:['Open full chat for rewrite','Move to review mode','Send to act lane']
+    }
+  }
+];
+
+const timelineItems = [
+  {time:'10:24',text:'Draft created for Recruiter X follow-up.'},
+  {time:'09:51',text:'Recruiter thread ingested. Two chunks. One new memory fact.'},
+  {time:'Apr 22',text:'Priya shared backend spec v1. Eight chunks indexed.'},
+  {time:'Apr 21',text:'Style profile updated from three approved drafts.'}
+];
+
+const chatMsgs = [
+  {role:'assistant',label:'Palora',body:'Morning sweep complete. Biggest unblock is Recruiter X — draft already exists and timing window is still warm.',tool:null},
+  {role:'user',label:'You',body:'Can you tighten the opener and show me what changed?',tool:null},
+  {role:'assistant',label:'Palora',body:"Yes. I'd shorten the first line, keep interest explicit, and move the timeline ask to sentence two.",tool:{title:'Prepared next step',summary:'Open draft in review mode with one proposed revision and approval gate preserved.',actions:['Open draft review','Open recall','Set reminder instead']}}
+];
+
+const draftItems = [
+  {kind:'ready now',title:'RE: Senior Engineering Role',summary:'Warm-formal follow-up to Recruiter X. Balanced interest and timeline ask.',tags:['Needs approval','Email','Career']},
+  {kind:'needs polish',title:'Intro Email Template',summary:'Reusable intro for engineering contacts. Good skeleton, opener still broad.',tags:['Draft','Reusable','Networking']}
+];
+
+const actItems = [
+  {kind:'approval',title:'Send Recruiter X email',summary:'Draft staged in Mail. Needs explicit yes before send.',tags:['Risk class 3','Approval required']},
+  {kind:'reminder',title:'Check Priya review by 4:00 PM',summary:'If no review started by 3:15 PM, resurface and prep summary.',tags:['Today','Project']}
+];
+
+const paletteItems = [
+  {title:'Draft follow-up to Recruiter X',sub:'Quick ask with recruiter context loaded.',run(){closePalette();nav('chat');setPrompt('Draft follow-up to Recruiter X in my tone and ask me before sending.')}},
+  {title:'What am I waiting on right now?',sub:'Quick context sweep.',run(){closePalette();nav('chat');setPrompt('What am I waiting on right now?')}},
+  {title:'Open full chat',sub:'Switch to agentic conversation surface.',run(){closePalette();nav('chat')}},
+  {title:'Open recall graph',sub:'Jump into graph mode for memory structure.',run(){closePalette();nav('recall')}},
+  {title:'Summarize Palora build status',sub:'Opens full chat with build-summary prompt.',run(){closePalette();nav('chat');setPrompt('Summarize Palora build status and suggest next actions.')}}
+];
+
+const graphNodes = [
+  {id:'you',kind:'person',label:'You',short:'YOU',x:50,y:56,summary:'Memory anchor for personal tasks, projects, and approvals.'},
+  {id:'recruiter_x',kind:'person',label:'Recruiter X',short:'RX',x:24,y:27,summary:'Recruiter at Company Y. Main open follow-up thread.'},
+  {id:'company_y',kind:'person',label:'Company Y',short:'CY',x:14,y:50,summary:'Organization behind recruiter conversation.'},
+  {id:'followup',kind:'task',label:'Send Follow-up',short:'Task',x:30,y:13,summary:'Task node for recruiter follow-up draft and approval.'},
+  {id:'draft_role',kind:'task',label:'Draft Ready',short:'Draft',x:18,y:72,summary:'Staged mail draft ready for review.'},
+  {id:'palora',kind:'project',label:'Palora Build',short:'Palora',x:68,y:33,summary:'Core build project with Priya and backend work.'},
+  {id:'priya',kind:'person',label:'Priya M.',short:'PM',x:43,y:74,summary:'Teammate currently waiting on review feedback.'},
+  {id:'rule',kind:'rule',label:'Never auto-send',short:'Rule',x:82,y:60,summary:'Policy node that blocks external send without explicit approval.'}
+];
+
+const graphEdges = [
+  {from:'you',to:'recruiter_x',style:'waiting'},
+  {from:'recruiter_x',to:'company_y',style:'normal'},
+  {from:'followup',to:'recruiter_x',style:'dashed'},
+  {from:'draft_role',to:'recruiter_x',style:'dashed'},
+  {from:'you',to:'palora',style:'strong'},
+  {from:'priya',to:'palora',style:'normal'},
+  {from:'rule',to:'you',style:'rule'}
+];
+
+/* ─── STATE ────────────────────────────────────────────────── */
+let activeFocus = 'recruiter';
+let activeNode  = 'recruiter_x';
+let filteredActions = paletteItems;
+
+/* ─── THEME ────────────────────────────────────────────────── */
+const MOON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="15" height="15"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`;
+const SUN_SVG  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="15" height="15"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === 'dark';
+  html.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('theme-btn').innerHTML = isDark ? MOON_SVG : SUN_SVG;
+  setTimeout(buildEdges, 50);
+}
+
+/* ─── NAV ──────────────────────────────────────────────────── */
+function nav(view) {
+  document.querySelectorAll('.dock-btn[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view===view));
+  const prev = document.querySelector('.view.active');
+  const next = document.querySelector(`.view[data-panel="${view}"]`);
+  if (prev === next) return;
+  if (prev) { prev.classList.add('exit'); prev.classList.remove('active'); setTimeout(() => prev.classList.remove('exit'), 220); }
+  if (next) next.classList.add('active');
+  if (view === 'recall') requestAnimationFrame(buildEdges);
+}
+
+/* ─── RENDER: HOME ─────────────────────────────────────────── */
+function renderQueue() {
+  const root = document.getElementById('queue-list');
+  const label = root.querySelector('.label');
+  root.innerHTML = '';
+  root.appendChild(label);
+  focusItems.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'q-item' + (item.id === activeFocus ? ' active' : '');
+    btn.innerHTML = `
+      <div class="q-meta">
+        <span class="q-kind">${item.kind}</span>
+        <span class="q-time">${item.time}</span>
+      </div>
+      <div class="q-title">${item.title}</div>
+      <div class="q-tags">${item.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>`;
+    btn.onclick = () => selectFocus(item.id);
+    root.appendChild(btn);
+  });
+}
+
+function renderSpotlight() {
+  const item = focusItems.find(f=>f.id===activeFocus)||focusItems[0];
+  document.getElementById('spotlight').innerHTML = `
+    <div class="spotlight-eyebrow label">Priority focus</div>
+    <div class="spotlight-title">${item.title}</div>
+    <div class="spotlight-tags">${item.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>
+    <div class="spotlight-actions">
+      <button class="btn-primary" onclick="nav('chat');setPrompt('${esc(item.prompt)}')">Open full chat</button>
+      <button class="btn-ghost" onclick="openPalette('${esc(item.prompt)}')">Quick ask</button>
+      <button class="btn-ghost" onclick="nav('recall')">Recall</button>
+    </div>`;
+}
+
+function renderTimeline() {
+  document.getElementById('timeline-items').innerHTML = timelineItems.map(t=>`
+    <div class="tl-item">
+      <div class="tl-time">${t.time}</div>
+      <div class="tl-text">${t.text}</div>
+    </div>`).join('');
+}
+
+function renderContext() {
+  const item = focusItems.find(f=>f.id===activeFocus)||focusItems[0];
+  const c = item.context;
+  document.getElementById('context-panel').innerHTML = `
+    <div class="ctx-eyebrow">${c.eyebrow}</div>
+    <div class="ctx-name">${c.name}</div>
+    <div class="ctx-stats">${c.stats.map(s=>`<div class="ctx-stat"><strong>${s.v}</strong><span>${s.l}</span></div>`).join('')}</div>
+    <div class="ctx-tags">${c.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>
+    <div class="ctx-actions">${c.actions.map(a=>`<button class="mini-action" onclick="handleCtxAction('${esc(a)}')">${a}</button>`).join('')}</div>`;
+}
+
+function selectFocus(id) {
+  activeFocus = id;
+  renderQueue(); renderSpotlight(); renderContext(); renderChatContext();
+  const item = focusItems.find(f=>f.id===id);
+  setPrompt(item.prompt);
+  if(id==='recruiter') activeNode='recruiter_x';
+  if(id==='priya')     activeNode='priya';
+  if(id==='intro')     activeNode='draft_role';
+  highlightNode(); renderInspector();
+}
+
+function handleCtxAction(label) {
+  if(label.includes('full chat')) { nav('chat'); return; }
+  if(label.includes('recall')) { nav('recall'); return; }
+  if(label.includes('reminder')) { nav('act'); return; }
+  if(label.includes('Draft')||label.includes('draft')||label.includes('review')) { nav('drafts'); return; }
+  toast(label);
+}
+
+/* ─── RENDER: CHAT ─────────────────────────────────────────── */
+function renderChat() {
+  document.getElementById('chat-thread').innerHTML = chatMsgs.map(m => {
+    const tool = m.tool ? `<div class="chat-tool"><h4>${m.tool.title}</h4><p>${m.tool.summary}</p><div class="chat-tool-actions">${m.tool.actions.map(a=>`<button class="${a==='Open draft review'?'primary':''}" onclick="handleToolAction('${esc(a)}')">${a}</button>`).join('')}</div></div>` : '';
+    return `<div class="msg ${m.role}"><div class="msg-av">${m.role==='assistant'?'P':'Y'}</div><div><div class="msg-who">${m.label}</div><div class="bubble">${m.body}${tool}</div></div></div>`;
+  }).join('');
+}
+
+function renderChatContext() {
+  const item = focusItems.find(f=>f.id===activeFocus)||focusItems[0];
+  document.getElementById('chat-context').innerHTML = `
+    <div class="s-eyebrow">${item.kind}</div>
+    <h3>${item.title}</h3>
+    <p style="font-size:12.5px;color:var(--t2);line-height:1.55;margin-top:5px;font-weight:400">${item.summary}</p>
+    <div class="tag-row" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:9px">${item.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>`;
+}
+
+function handleToolAction(label) {
+  if(label.includes('draft')) { nav('drafts'); return; }
+  if(label.includes('recall')) { nav('recall'); return; }
+  toast(label);
+}
+
+function setPrompt(text) { document.getElementById('chat-composer').value = text; }
+
+/* ─── RENDER: DRAFTS & ACT ─────────────────────────────────── */
+function renderDrafts() {
+  document.getElementById('draft-list').innerHTML = draftItems.map(d=>`
+    <button class="draft-item" onclick="toast('Draft preview not wired yet')">
+      <div class="draft-item-kind">${d.kind}</div>
+      <div class="draft-item-title">${d.title}</div>
+      <div class="draft-item-body">${d.summary}</div>
+      <div class="tag-row" style="display:flex;flex-wrap:wrap;gap:4px">${d.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>
+    </button>`).join('');
+}
+
+function renderActs() {
+  document.getElementById('act-list').innerHTML = actItems.map(a=>`
+    <button class="act-item" onclick="toast('Action review not wired yet')">
+      <div class="act-item-kind">${a.kind}</div>
+      <div class="act-item-title">${a.title}</div>
+      <div class="act-item-body">${a.summary}</div>
+      <div class="tag-row" style="display:flex;flex-wrap:wrap;gap:4px">${a.tags.map((t,i)=>`<span class="tag${i===0?' amber':''}">${t}</span>`).join('')}</div>
+    </button>`).join('');
+}
+
+/* ─── GRAPH ────────────────────────────────────────────────── */
+function buildGraph() {
+  const stage = document.getElementById('recall-stage');
+  graphNodes.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = `graph-node ${n.kind}`;
+    btn.dataset.nodeId = n.id;
+    btn.style.cssText = `left:${n.x}%;top:${n.y}%`;
+    btn.innerHTML = `<div class="graph-halo"></div><div class="graph-vis">${n.short}</div><div class="graph-label">${n.label}</div>`;
+    btn.onclick = () => { activeNode = n.id; highlightNode(); renderInspector(); };
+    stage.appendChild(btn);
+  });
+  highlightNode(); buildEdges();
+}
+
+function buildEdges() {
+  const svg = document.getElementById('graph-svg');
+  const stage = document.getElementById('recall-stage');
+  const sr = stage.getBoundingClientRect();
+  svg.innerHTML = '';
+  graphEdges.forEach(e => {
+    const fe = document.querySelector(`[data-node-id="${e.from}"]`);
+    const te = document.querySelector(`[data-node-id="${e.to}"]`);
+    if(!fe||!te||!sr.width) return;
+    const fr=fe.getBoundingClientRect(), tr=te.getBoundingClientRect();
+    const x1=fr.left+fr.width/2-sr.left, y1=fr.top+fr.height/2-sr.top;
+    const x2=tr.left+tr.width/2-sr.left, y2=tr.top+tr.height/2-sr.top;
+    const cx=x1+(x2-x1)*0.5+(y2-y1)*0.1, cy=y1+(y2-y1)*0.5-(x2-x1)*0.1;
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${x1},${y1} Q${cx},${cy} ${x2},${y2}`);
+    p.setAttribute('fill','none');
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const styles = {
+      waiting:{stroke: dark ? 'rgba(232,168,74,0.55)' : 'rgba(180,110,20,0.5)',   w:'1.8',dash:'6 5'},
+      strong: {stroke: dark ? 'rgba(255,248,238,0.22)' : 'rgba(40,24,10,0.22)',  w:'1.7',dash:''},
+      dashed: {stroke: dark ? 'rgba(255,248,238,0.16)' : 'rgba(40,24,10,0.16)',  w:'1.1',dash:'4 5'},
+      rule:   {stroke: dark ? 'rgba(140,128,240,0.38)' : 'rgba(100,90,200,0.38)',w:'1.2',dash:'3 5'},
+      normal: {stroke: dark ? 'rgba(255,248,238,0.14)' : 'rgba(40,24,10,0.16)',  w:'1.1',dash:''}
+    };
+    const s=styles[e.style]||styles.normal;
+    p.setAttribute('stroke',s.stroke);
+    p.setAttribute('stroke-width',s.w);
+    if(s.dash) p.setAttribute('stroke-dasharray',s.dash);
+    svg.appendChild(p);
+  });
+}
+
+function highlightNode() {
+  document.querySelectorAll('.graph-node').forEach(n => n.classList.toggle('active', n.dataset.nodeId===activeNode));
+}
+
+function renderInspector() {
+  const n = graphNodes.find(g=>g.id===activeNode)||graphNodes[0];
+  document.getElementById('recall-inspector').innerHTML = `
+    <div class="inspector-block">
+      <div class="eyebrow">${n.kind}</div>
+      <h2>${n.label}</h2>
+      <p>${n.summary}</p>
+    </div>
+    <div class="inspector-block">
+      <div class="eyebrow">Why visible</div>
+      <p>${n.id==='recruiter_x'?'Selected because recruiter thread is current highest-leverage open loop.':'Selected because it supports active work or policy context.'}</p>
+    </div>
+    <div class="inspector-block">
+      <div class="eyebrow">Mode guidance</div>
+      <p>Recall is for structure and provenance. Return to dashboard for triage or full chat for multi-step agent work.</p>
+    </div>`;
+}
+
+/* ─── PALETTE ──────────────────────────────────────────────── */
+function openPalette(prefill='') {
+  const overlay = document.getElementById('cmd-overlay');
+  overlay.classList.add('open');
+  const inp = document.getElementById('palette-input');
+  inp.value = prefill; filterPalette(prefill);
+  setTimeout(()=>inp.focus(), 40);
+}
+function closePalette() { document.getElementById('cmd-overlay').classList.remove('open'); }
+function closePaletteOutside(e) { if(e.target===document.getElementById('cmd-overlay')) closePalette(); }
+
+function filterPalette(q) {
+  const norm = q.trim().toLowerCase();
+  let actions = paletteItems;
+  if(norm) {
+    actions = paletteItems.filter(a=>a.title.toLowerCase().includes(norm)||a.sub.toLowerCase().includes(norm));
+    if(!actions.length) actions=[{title:`Send to chat: "${q}"`,sub:'Use freeform prompt in agentic chat view.',run(){closePalette();nav('chat');setPrompt(q)}}];
+  }
+  filteredActions = actions;
+  document.getElementById('palette-actions').innerHTML = actions.map((a,i)=>`
+    <button class="palette-action" onclick="runAction(${i})">
+      <strong>${a.title}</strong><span>${a.sub}</span>
+    </button>`).join('');
+}
+
+function runAction(i) { filteredActions[i]?.run(); }
+
+function paletteKey(e) {
+  if(e.key==='Escape') closePalette();
+  if(e.key==='Enter') { e.preventDefault(); filteredActions[0]?.run(); }
+}
+
+/* ─── TOAST ────────────────────────────────────────────────── */
+function toast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>el.classList.remove('show'), 2400);
+}
+
+/* ─── UTILS ────────────────────────────────────────────────── */
+function esc(s) { return String(s).replace(/'/g,'&apos;'); }
+
+/* ─── KEYBOARD ─────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k') { e.preventDefault(); openPalette(); }
+  if(e.key==='Escape') closePalette();
+});
+
+/* ─── INIT ─────────────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  // set correct icon for initial dark mode
+  document.getElementById('theme-btn').innerHTML = SUN_SVG;
+
+  renderQueue(); renderSpotlight(); renderTimeline(); renderContext();
+  renderChat(); renderChatContext();
+  renderDrafts(); renderActs();
+  buildGraph(); renderInspector();
+  setPrompt('Draft follow-up to Recruiter X in my tone and ask me before sending.');
+  filterPalette('');
+  const hash = location.hash.replace('#','');
+  if(hash) nav(hash);
+});
+
+window.addEventListener('resize', buildEdges);
+</script>
+</body>
+</html>
