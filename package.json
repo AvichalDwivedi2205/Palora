@@ -1,0 +1,15 @@
+{
+  "name": "palora",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Palora desktop app",
+  "main": "desktop/main.js",
+  "scripts": {
+    "start": "electron .",
+    "backend": "cd backend && python3 -m app.main",
+    "test:backend": "cd backend && python3 -m pytest"
+  },
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}
